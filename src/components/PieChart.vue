@@ -25,6 +25,22 @@ onMounted(() => {
         },
         tooltip: {
           enabled: true, // Exibe tooltips para cada segmento
+          callbacks: {
+            label: function (context) {
+              let label = context.label || "";
+
+              if (label) {
+                label += ": ";
+              }
+              if (context.raw !== null) {
+                label += new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(context.raw);
+              }
+              return label;
+            },
+          },
         },
       },
     },

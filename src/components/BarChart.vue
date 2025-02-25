@@ -46,6 +46,22 @@ onMounted(() => {
         },
         tooltip: {
           enabled: true, // Exibe tooltips ao passar o mouse sobre as barras
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+
+              if (label) {
+                label += ": ";
+              }
+              if (context.parsed.y !== null) {
+                label += new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(context.parsed.y);
+              }
+              return label;
+            },
+          },
         },
       },
     },

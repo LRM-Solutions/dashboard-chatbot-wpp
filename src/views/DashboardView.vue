@@ -86,7 +86,9 @@ onMounted(async () => {
           <PieChart :data="gastosPorCategoriaList" />
         </div>
         <div class="chart-container bg-white shadow-lg rounded-xl">
-          <span class="md:text-2xl text-xl font-bold"> Total de gastos </span>
+          <span class="md:text-2xl text-xl font-bold">
+            Total de gastos por Mês
+          </span>
 
           <BarChart :data="gastosPorMes" />
         </div>

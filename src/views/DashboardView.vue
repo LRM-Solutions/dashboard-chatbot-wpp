@@ -2,20 +2,32 @@
 import { useDashboardStore } from "@/stores/dashboard";
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
-
+import { formatarData } from "@/utils/date";
 const route = useRoute();
 const dashboardStore = useDashboardStore();
 
-const { gastosPorCategoria, gastosUltimosMeses } = dashboardStore;
+const {
+  gastosPorCategoria,
+  gastosUltimosMeses,
+  gastosTotalDoMes,
+  gastosDoMesLista,
+} = dashboardStore;
+
 const gastosPorCategoriaList = ref(null);
 const gastosPorMes = ref(null);
+const totalGastosDoMes = ref(null);
+const totalGastosDoMesLista = ref(null);
 
 const loading = ref(false);
 
 const initFunction = async () => {
   loading.value = true;
+
   gastosPorCategoriaList.value = await gastosPorCategoria(route.params.chat_id);
   gastosPorMes.value = await gastosUltimosMeses(route.params.chat_id);
+  totalGastosDoMes.value = await gastosTotalDoMes(route.params.chat_id);
+  totalGastosDoMesLista.value = await gastosDoMesLista(route.params.chat_id);
+
   loading.value = false;
 };
 
@@ -55,24 +67,64 @@ onMounted(async () => {
       </div>
       <div
         class="w-full md:w-[fit-content] text-sm bg-emerald-700 px-4 py-2 rounded-lg"
+        v-if="!loading && totalGastosDoMes"
       >
-        Gastos do Mês: R$ {{ currentMonthExpenses }}
+        Gastos do Mês: R$
+        {{ totalGastosDoMes.total.toFixed(2).replace(".", ",") }}
       </div>
     </header>
 
-    <main class="flex flex-col w-full p-4" v-if="!loading">
+    <main class="flex flex-col w-full p-4 mt-5 mb-5 gap-10" v-if="!loading">
       <div class="flex flex-col gap-5 items-center justify-center md:flex-row">
-        <div class="chart-container" v-if="gastosPorCategoriaList">
-          <span> Total de gastos por Categoria </span>
+        <div
+          class="chart-container bg-white shadow-lg rounded-xl"
+          v-if="gastosPorCategoriaList"
+        >
+          <span class="md:text-2xl text-xl font-bold">
+            Total de gastos por Categoria
+          </span>
           <PieChart :data="gastosPorCategoriaList" />
         </div>
-        <div class="chart-container">
-          <span> Total de gastos </span>
+        <div class="chart-container bg-white shadow-lg rounded-xl">
+          <span class="md:text-2xl text-xl font-bold"> Total de gastos </span>
 
           <BarChart :data="gastosPorMes" />
         </div>
       </div>
-      <div></div>
+      <div
+        v-if="totalGastosDoMesLista"
+        class="bg-white p-5 w-[93%] md:w-[1020px] m-auto shadow-lg rounded-xl md:p-10 flex flex-col gap-5 mb-10"
+      >
+        <h1 class="ml-3 md:text-2xl text-lg font-bold">
+          Tabela de Gastos do Mês atual
+        </h1>
+        <DataTable
+          :value="totalGastosDoMesLista"
+          tableStyle="min-width: 50rem; background-color: #ffffff; border-radius: 10px;"
+          class="w-full"
+        >
+          <Column
+            field="descricao"
+            header="Descrição"
+            style="width: 15%"
+          ></Column>
+          <Column
+            field="categoria"
+            header="Categoria"
+            style="width: 15%"
+          ></Column>
+          <Column field="valor" header="Valor" sortable style="width: 15%">
+            <template #body="slotProps">
+              R$ {{ slotProps.data.valor.toFixed(2).replace(".", ",") }}
+            </template>
+          </Column>
+          <Column field="data" header="Data" sortable style="width: 15%">
+            <template #body="slotProps">
+              {{ formatarData(slotProps.data.data) }}
+            </template>
+          </Column>
+        </DataTable>
+      </div>
     </main>
     <div v-else class="flex items-center justify-center flex-1">
       <i
@@ -88,34 +140,30 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 2px solid rgba(128, 128, 128, 0.292);
+
   width: 500px;
   height: 500px;
   gap: 10px;
-  border-radius: 20px;
-  padding: 10px;
 
-  span {
-    font-size: 34px;
-    font-weight: 400;
-  }
+  padding: 20px;
 
   @media (max-width: 700px) {
     padding: 10px;
 
     width: 100%;
     height: auto;
-
-    span {
-      font-size: 30px;
-    }
   }
 
   @media (max-width: 400px) {
     gap: 5px;
-    span {
-      font-size: 20px;
-    }
   }
+}
+
+.row-even {
+  background-color: #f9f9f9; /* Cor para linhas pares */
+}
+
+.row-odd {
+  background-color: #ffffff; /* Cor para linhas ímpares */
 }
 </style>

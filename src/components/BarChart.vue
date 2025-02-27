@@ -8,7 +8,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 
 // Registra os componentes necessários para o gráfico de barras
 Chart.register(
@@ -26,6 +26,15 @@ const props = defineProps({
   data: Object,
 });
 
+// Calcula o maior valor da lista de gastos
+const maxValue = computed(() => {
+  if (!props.data || !props.data.datasets || props.data.datasets.length === 0) {
+    return 0;
+  }
+  const values = props.data.datasets[0].data; // Assume que os dados estão no primeiro dataset
+  return Math.max(...values);
+});
+
 onMounted(() => {
   const canvas = ctx.value.getContext("2d");
 
@@ -36,7 +45,16 @@ onMounted(() => {
       scales: {
         y: {
           beginAtZero: true, // Começa o eixo y em zero
-          max: 10, // Limita o eixo y até a nota máxima (10)
+          max: maxValue.value * 1.1, // Define o máximo do eixo Y como 10% acima do maior valor
+          ticks: {
+            // Formata os valores do eixo Y em R$
+            callback: function (value) {
+              return new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(value);
+            },
+          },
         },
       },
       plugins: {

@@ -16,11 +16,13 @@ import InputText from "primevue/inputtext";
 import Toast from "primevue/toast";
 import BarChart from "./components/BarChart.vue";
 import PieChart from "./components/PieChart.vue";
-
+import { DataTable } from "primevue";
+import { Column } from "primevue";
 import ProgressSpinner from "primevue/progressspinner";
 
 // import components
-
+app.component("DataTable", DataTable);
+app.component("Column", Column);
 app.component("ProgressSpinner", ProgressSpinner);
 app.component("BarChart", BarChart);
 app.component("PieChart", PieChart);
